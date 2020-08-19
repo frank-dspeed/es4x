@@ -346,6 +346,11 @@ class EcmaScriptWriter extends CodeWriter {
   }
 
   @Override
+  public void renderNewArray(String s, List<ExpressionModel> list) {
+    renderListLiteral(list);
+  }
+
+  @Override
   public void renderMapGet(ExpressionModel map, ExpressionModel key) {
     map.render(this);
     append('[');
