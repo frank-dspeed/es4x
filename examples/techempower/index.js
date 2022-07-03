@@ -124,7 +124,7 @@ const templateFortunes = ({ fortunes }) => `<!DOCTYPE html>
     <th>message</th>
   </tr>
 
-  ${fortunes.forEach(templateFortune)}
+  ${fortunes.map(templateFortune).join('\n')}
 
 </table>
 </body>
