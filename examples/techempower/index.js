@@ -5,14 +5,12 @@ import {Router} from '@vertx/web';
 
 import {PgClient, Tuple} from '@reactiverse/reactive-pg-client';
 import {PgPoolOptions} from '@reactiverse/reactive-pg-client/options';
-import {HandlebarsTemplateEngine} from '@vertx/web-templ-handlebars'
 
 const util = require('./util');
 
 const SERVER = 'vertx.js';
-
 const app = Router.router(vertx);
-const template = HandlebarsTemplateEngine.create(vertx);
+
 let date = new Date().toUTCString();
 
 vertx.setPeriodic(1000, t => date = new Date().toUTCString());
@@ -111,6 +109,27 @@ app.get("/queries").handler(ctx => {
  * This test exercises the ORM, database connectivity, dynamic-size collections, sorting, server-side templates,
  * XSS countermeasures, and character encoding.
  */
+const templateFortune = ({ id, message }) => `<tr>
+  <td>${id}</td>
+  <td>${message}</td>
+</tr>`;
+
+const templateFortunes = ({ fortunes }) => `<!DOCTYPE html>
+<html>
+<head><title>Fortunes</title></head>
+<body>
+<table>
+  <tr>
+    <th>id</th>
+    <th>message</th>
+  </tr>
+
+  ${fortunes.forEach(templateFortune)}
+
+</table>
+</body>
+</html>`;
+
 app.get("/fortunes").handler(ctx => {
   client.preparedQuery(SELECT_FORTUNE, ar => {
 
@@ -146,17 +165,14 @@ app.get("/fortunes").handler(ctx => {
       return 0;
     });
 
-    // and now delegate to the engine to render it.
-    template.render({fortunes: fortunes}, "templates/fortunes.hbs", res => {
-      if (res.succeeded()) {
-        ctx.response()
-          .putHeader("Server", SERVER)
-          .putHeader("Date", date)
-          .putHeader("Content-Type", "text/html; charset=UTF-8")
-          .end(res.result());
-      } else {
-        ctx.fail(res.cause());
-      }
+    ctx.response()
+      .putHeader("Server", SERVER)
+      .putHeader("Date", date)
+      .putHeader("Content-Type", "text/html; charset=UTF-8")
+      .end(
+        templateFortunes({ fortunes })
+      );
+
     });
   });
 });
