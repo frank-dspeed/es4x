@@ -109,9 +109,12 @@ app.get("/queries").handler(ctx => {
  * This test exercises the ORM, database connectivity, dynamic-size collections, sorting, server-side templates,
  * XSS countermeasures, and character encoding.
  */
+const escapeHtml = (unsafe) => 
+    unsafe.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+
 const templateFortune = ({ id, message }) => `<tr>
-  <td>${id}</td>
-  <td>${message}</td>
+  <td>${escapeHtml(id)}</td>
+  <td>${escapeHtml(message)}</td>
 </tr>`;
 
 const templateFortunes = ({ fortunes }) => `<!DOCTYPE html>
